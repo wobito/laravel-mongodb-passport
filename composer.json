@@ -5,7 +5,7 @@
     "license": "MIT",
     "keywords": [ "laravel", "laravel-mongodb", "laravel-mongodb-passport", "laravel-passport", "mongodb", "passport" ],
     "require": {
-        "illuminate/support": "^5.5 || ^6.0",
+        "illuminate/support": "^5.5 || ^6.0 || ^7.0",
         "laravel/passport": "4.0.* || 5.0.* || 6.0.* || 7.0.* || 7.4.* || 7.5.* || ^8.0"
     },
     "autoload": {

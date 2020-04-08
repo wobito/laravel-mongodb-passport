@@ -4,13 +4,13 @@ namespace Wobito\Mongodb\Passport;
 
 use Jenssegers\Mongodb\Eloquent\Model;
 
-class AuthCode extends Model {
+class RefreshToken extends Model {
     /**
      * The database table used by the model.
      *
      * @var string
      */
-    protected $table = 'oauth_auth_codes';
+    protected $table = 'oauth_refresh_tokens';
 
     /**
      * Indicates if the IDs are auto-incrementing.
@@ -18,6 +18,13 @@ class AuthCode extends Model {
      * @var bool
      */
     public $incrementing = false;
+
+    /**
+     * The "type" of the primary key ID.
+     *
+     * @var string
+     */
+    protected $keyType = 'string';
 
     /**
      * The guarded attributes on the model.
@@ -52,18 +59,29 @@ class AuthCode extends Model {
     public $timestamps = false;
 
     /**
-     * The "type" of the primary key ID.
-     *
-     * @var string
-     */
-    protected $keyType = 'string';
-
-    /**
-     * Get the client that owns the authentication code.
+     * Get the access token that the refresh token belongs to.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function client() {
-        return $this->belongsTo(Passport::clientModel());
+    public function accessToken() {
+        return $this->belongsTo(Passport::tokenModel());
+    }
+
+    /**
+     * Revoke the token instance.
+     *
+     * @return bool
+     */
+    public function revoke() {
+        return $this->forceFill(['revoked' => true])->save();
+    }
+
+    /**
+     * Determine if the token is a transient JWT token.
+     *
+     * @return bool
+     */
+    public function transient() {
+        return false;
     }
 }

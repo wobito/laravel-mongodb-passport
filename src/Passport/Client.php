@@ -1,11 +1,10 @@
 <?php
 
-namespace DesignMyNight\Mongodb\Passport;
+namespace Wobito\Mongodb\Passport;
 
 use Jenssegers\Mongodb\Eloquent\Model;
 
-class Client extends Model
-{
+class Client extends Model {
     /**
      * The database table used by the model.
      *
@@ -35,19 +34,30 @@ class Client extends Model
      * @var array
      */
     protected $casts = [
+        'grant_types'            => 'array',
         'personal_access_client' => 'bool',
-        'password_client' => 'bool',
-        'revoked' => 'bool',
+        'password_client'        => 'bool',
+        'revoked'                => 'bool',
     ];
+
+    /**
+     * Get the user that the client belongs to.
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function user() {
+        return $this->belongsTo(
+            config('auth.providers.' . config('auth.guards.api.provider') . '.model')
+        );
+    }
 
     /**
      * Get all of the authentication codes for the client.
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function authCodes()
-    {
-        return $this->hasMany(AuthCode::class);
+    public function authCodes() {
+        return $this->hasMany(Passport::authCodeModel(), 'client_id');
     }
 
     /**
@@ -55,9 +65,8 @@ class Client extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\HasMany
      */
-    public function tokens()
-    {
-        return $this->hasMany(Token::class);
+    public function tokens() {
+        return $this->hasMany(Passport::tokenModel(), 'client_id');
     }
 
     /**
@@ -65,8 +74,7 @@ class Client extends Model
      *
      * @return bool
      */
-    public function firstParty()
-    {
+    public function firstParty() {
         return $this->personal_access_client || $this->password_client;
     }
 
@@ -75,18 +83,16 @@ class Client extends Model
      *
      * @return bool
      */
-    public function skipsAuthorization()
-    {
+    public function skipsAuthorization() {
         return false;
     }
-    
+
     /**
      * Determine if the client is a confidential client.
      *
      * @return bool
      */
-    public function confidential()
-    {
-        return ! empty($this->secret);
+    public function confidential() {
+        return !empty($this->secret);
     }
 }

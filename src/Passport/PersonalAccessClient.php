@@ -1,11 +1,10 @@
 <?php
 
-namespace DesignMyNight\Mongodb\Passport;
+namespace Wobito\Mongodb\Passport;
 
 use Jenssegers\Mongodb\Eloquent\Model;
 
-class PersonalAccessClient extends Model
-{
+class PersonalAccessClient extends Model {
     /**
      * The database table used by the model.
      *
@@ -25,8 +24,7 @@ class PersonalAccessClient extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function client()
-    {
-        return $this->belongsTo(Client::class);
+    public function client() {
+        return $this->belongsTo(Passport::clientModel());
     }
 }

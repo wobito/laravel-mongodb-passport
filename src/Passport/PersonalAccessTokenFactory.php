@@ -1,17 +1,16 @@
 <?php
 
-namespace DesignMyNight\Mongodb\Passport;
+namespace Wobito\Mongodb\Passport;
 
-use Zend\Diactoros\Response;
-use Zend\Diactoros\ServerRequest;
+use Laminas\Diactoros\Response;
+use Laminas\Diactoros\ServerRequest;
 use Lcobucci\JWT\Parser as JwtParser;
 use League\OAuth2\Server\AuthorizationServer;
-use \Laravel\Passport\ClientRepository;
+use Laravel\Passport\ClientRepository;
 use Laravel\Passport\PersonalAccessTokenResult;
 use Laravel\Passport\TokenRepository;
 
-class PersonalAccessTokenFactory
-{
+class PersonalAccessTokenFactory {
     /**
      * The authorization server instance.
      *
@@ -49,11 +48,12 @@ class PersonalAccessTokenFactory
      * @param  \Lcobucci\JWT\Parser  $jwt
      * @return void
      */
-    public function __construct(AuthorizationServer $server,
-                                ClientRepository $clients,
-                                TokenRepository $tokens,
-                                JwtParser $jwt)
-    {
+    public function __construct(
+        AuthorizationServer $server,
+        ClientRepository $clients,
+        TokenRepository $tokens,
+        JwtParser $jwt
+    ) {
         $this->jwt = $jwt;
         $this->tokens = $tokens;
         $this->server = $server;
@@ -68,21 +68,21 @@ class PersonalAccessTokenFactory
      * @param  array  $scopes
      * @return \Laravel\Passport\PersonalAccessTokenResult
      */
-    public function make($userId, $name, array $scopes = [])
-    {
+    public function make($userId, $name, array $scopes = []) {
         $response = $this->dispatchRequestToAuthorizationServer(
             $this->createRequest($this->clients->personalAccessClient(), $userId, $scopes)
         );
 
         $token = tap($this->findAccessToken($response), function ($token) use ($userId, $name) {
-            $token->forceFill([
+            $this->tokens->save($token->forceFill([
                 'user_id' => $userId,
-                'name' => $name,
-            ])->save();
+                'name'    => $name,
+            ]));
         });
 
         return new PersonalAccessTokenResult(
-            $response['access_token'], $token
+            $response['access_token'],
+            $token
         );
     }
 
@@ -92,29 +92,28 @@ class PersonalAccessTokenFactory
      * @param  \Laravel\Passport\Client  $client
      * @param  mixed  $userId
      * @param  array  $scopes
-     * @return \Zend\Diactoros\ServerRequest
+     * @return \Laminas\Diactoros\ServerRequest
      */
-    protected function createRequest($client, $userId, array $scopes)
-    {
+    protected function createRequest($client, $userId, array $scopes) {
         return (new ServerRequest)->withParsedBody([
-            'grant_type' => 'personal_access',
-            'client_id' => $client->id,
+            'grant_type'    => 'personal_access',
+            'client_id'     => $client->id,
             'client_secret' => $client->secret,
-            'user_id' => $userId,
-            'scope' => implode(' ', $scopes),
+            'user_id'       => $userId,
+            'scope'         => implode(' ', $scopes),
         ]);
     }
 
     /**
      * Dispatch the given request to the authorization server.
      *
-     * @param  \Zend\Diactoros\ServerRequest  $request
+     * @param  \Laminas\Diactoros\ServerRequest  $request
      * @return array
      */
-    protected function dispatchRequestToAuthorizationServer(ServerRequest $request)
-    {
+    protected function dispatchRequestToAuthorizationServer(ServerRequest $request) {
         return json_decode($this->server->respondToAccessTokenRequest(
-            $request, new Response
+            $request,
+            new Response
         )->getBody()->__toString(), true);
     }
 
@@ -122,10 +121,9 @@ class PersonalAccessTokenFactory
      * Get the access token instance for the parsed response.
      *
      * @param  array  $response
-     * @return Token
+     * @return \Laravel\Passport\Token
      */
-    protected function findAccessToken(array $response)
-    {
+    protected function findAccessToken(array $response) {
         return $this->tokens->find(
             $this->jwt->parse($response['access_token'])->getClaim('jti')
         );

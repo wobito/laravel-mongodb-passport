@@ -1,17 +1,16 @@
 <?php
 
-namespace DesignMyNight\Mongodb;
+namespace Wobito\Mongodb;
 
 use Illuminate\Support\ServiceProvider;
-use DesignMyNight\Mongodb\Passport\AuthCode;
-use DesignMyNight\Mongodb\Passport\Client;
-use DesignMyNight\Mongodb\Passport\PersonalAccessClient;
-use DesignMyNight\Mongodb\Passport\Token;
+use Wobito\Mongodb\Passport\AuthCode;
+use Wobito\Mongodb\Passport\Client;
+use Wobito\Mongodb\Passport\PersonalAccessClient;
+use Wobito\Mongodb\Passport\Token;
+use Wobito\Mongodb\Passport\RefreshToken;
 
-class MongodbPassportServiceProvider extends ServiceProvider
-{
-    public function register()
-    {
+class MongodbPassportServiceProvider extends ServiceProvider {
+    public function register() {
         /*
          * Passport client extends Eloquent model by default, so we alias them.
          */
@@ -21,11 +20,13 @@ class MongodbPassportServiceProvider extends ServiceProvider
             $loader->alias('Laravel\Passport\Client', Client::class);
             $loader->alias('Laravel\Passport\PersonalAccessClient', PersonalAccessClient::class);
             $loader->alias('Laravel\Passport\Token', Token::class);
+            $loader->alias('Laravel\Passport\RefreshToken', RefreshToken::class);
         } else {
             class_alias('Laravel\Passport\AuthCode', AuthCode::class);
             class_alias('Laravel\Passport\Client', Client::class);
             class_alias('Laravel\Passport\PersonalAccessClient', PersonalAccessClient::class);
             class_alias('Laravel\Passport\Token', Token::class);
+            class_alias('Laravel\Passport\RefreshToken', RefreshToken::class);
         }
     }
 }
